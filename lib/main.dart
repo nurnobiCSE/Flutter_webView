@@ -8,6 +8,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:qtacademy/splash_screen.dart';
 
 import 'check_internet.dart';
 
@@ -27,10 +28,32 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
 
 
+
+  // This widget is the root of your application.
+  @override
+
+  Widget build(BuildContext context) {
+    return MaterialApp(home: SplashScreen(),
+    debugShowCheckedModeBanner: false,
+    );
+
+  }
+
+}
+
+//extra class creatirng start=============
+
+class HomePage extends StatefulWidget {
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+bool _isloading = true;
+var isDeviceConnected = false;
+class _HomePageState extends State<HomePage> {
   var _scafoldkey = GlobalKey<ScaffoldState>();
   late WebViewController _controller;
   late StreamSubscription subscription;
-  var isDeviceConnected = false;
   bool isAlertSet = false;
 
   @override
@@ -38,6 +61,7 @@ class _MyAppState extends State<MyApp> {
     // TODO: implement initState
     requestPermission();
     super.initState();
+    _isloading = true;
   }
   getConnectivity() =>
       subscription = Connectivity().onConnectivityChanged.listen(
@@ -67,20 +91,18 @@ class _MyAppState extends State<MyApp> {
       await Permission.manageExternalStorage.request();
     }
   }
-  // This widget is the root of your application.
   @override
-
   Widget build(BuildContext context) {
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "WebView",
+      title: "Blunel",
       theme: ThemeData(
-          primarySwatch: Colors.blue
+
       ),
       home: Scaffold(
         key: _scafoldkey,
         appBar: AppBar(
+          backgroundColor: Colors.pinkAccent,
           leading: IconButton(
               onPressed: ()async{
                 if(await _controller.canGoBack()){
@@ -89,7 +111,7 @@ class _MyAppState extends State<MyApp> {
               },
               icon: Icon(Icons.arrow_back)
           ),
-          title: Text("QTACADEMY"),
+          title: Image.asset("assets/blunel.png",height: 90,width: 120,),
           actions: [
             IconButton(
                 onPressed: (){
@@ -99,27 +121,42 @@ class _MyAppState extends State<MyApp> {
             )
           ],
         ),
-        body: Center(
-          child: WillPopScope(
-            onWillPop: ()async{
-              if (await _controller.canGoBack()) {
-                _controller.goBack();
-                return false;
-              } else{
-                return true;
-              }
-            },
-              
-            child: WebView(
-              initialUrl: 'https://quickteamacademy.com/',
-              javascriptMode: JavascriptMode.unrestricted,
+        body: Stack(
+          children :[
 
-              onWebViewCreated: (WebViewController webViewController){
-                _controller = webViewController;
-              },
-            )
+          Center(
+            child: WillPopScope(
+                onWillPop: ()async{
+                  if (await _controller.canGoBack()) {
+                    _controller.goBack();
+                    return false;
+                  } else{
+                    return true;
+                  }
+                },
+
+                child: WebView(
+                  initialUrl: 'https://blunel.com/',
+                  onPageFinished: (finish){
+                    setState(() {
+                      _isloading = false;
+                    });
+                  },
+                  javascriptMode: JavascriptMode.unrestricted,
+
+                  onWebViewCreated: (WebViewController webViewController){
+                    _controller = webViewController;
+                  },
+                ),
+
+            ),
+
           ),
+            _isloading == true ?
+            Center(child: CircularProgressIndicator(),):SizedBox()
+           ]
         ),
+
       ),
     );
   }
@@ -146,4 +183,3 @@ class _MyAppState extends State<MyApp> {
       )
   );
 }
-
